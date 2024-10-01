@@ -1,0 +1,67 @@
+import requests
+import pygame
+import time
+
+# Your OpenWeatherMap API Key
+API_KEY = "YOUR_OPENWEATHERMAP_API_KEY"
+CITY = "YOUR_CITY"
+URL = f"http://api.openweathermap.org/data/2.5/weather?q={CITY}&appid={API_KEY}&units=metric"
+
+# Image file paths based on weather conditions
+WEATHER_IMAGES = {
+    "Clear": "images/sunny.png",
+    "Clouds": "images/cloudy.png",
+    "Rain": "images/rainy.png",
+    "Snow": "images/snowy.png",
+    "Thunderstorm": "images/thunderstorm.png",
+    "Drizzle": "images/drizzle.png",
+    "Mist": "images/mist.png",
+}
+
+# Function to get weather data
+def get_weather():
+    try:
+        response = requests.get(URL)
+        response.raise_for_status()
+        data = response.json()
+        weather = data["weather"][0]["main"]
+        return weather
+    except requests.RequestException as e:
+        print(f"Error fetching weather data: {e}")
+        return None
+
+# Function to display image based on weather condition
+def display_weather_image(weather):
+    if weather in WEATHER_IMAGES:
+        image_path = WEATHER_IMAGES[weather]
+    else:
+        image_path = "images/default.png"  # Default image if condition is not recognized
+
+    # Load and display the image using Pygame
+    screen.fill((0, 0, 0))  # Clear the screen
+    image = pygame.image.load(image_path)
+    image = pygame.transform.scale(image, (screen_width, screen_height))
+    screen.blit(image, (0, 0))
+    pygame.display.update()
+
+# Initialize Pygame
+pygame.init()
+screen_width, screen_height = 800, 480  # Adjust these values as needed for your screen
+screen = pygame.display.set_mode((screen_width, screen_height))
+pygame.display.set_caption("Weather Display")
+
+# Main loop to get weather updates and display images
+try:
+    while True:
+        weather = get_weather()
+        if weather:
+            display_weather_image(weather)
+        
+        # Wait for 10 minutes before checking the weather again
+        time.sleep(600)
+
+except KeyboardInterrupt:
+    print("Program stopped by user")
+
+finally:
+    pygame.quit()
